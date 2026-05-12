@@ -2,6 +2,7 @@
 #include <stack>
 #include <random>
 #include <utility>
+#include <iostream>
 
 Graph::Graph(int size) : size(size), totalNodes(size * size) {
     nodes.resize(totalNodes);
@@ -106,4 +107,66 @@ void Graph::generateGuaranteedGameMap(unsigned int seed, double openFactor) {
             }
         }
     }
+}
+
+#include <iostream> // Make sure this is included at the top of Graph.cpp
+
+// ... (Your existing Graph.cpp code) ...
+
+void Graph::printMaze() const {
+    // Print the top outer boundary
+    for (int x = 0; x < size * 2 + 1; ++x) std::cout << "██";
+    std::cout << "\n";
+
+    for (int y = 0; y < size; ++y) {
+        // Left boundary for the current row
+        std::cout << "██"; 
+        
+        // Print the rooms (nodes) and the Right doors (horizontal connections)
+        for (int x = 0; x < size; ++x) {
+            int currIdx = getIndex(x, y);
+            
+            // Draw the room itself
+            if (x == 0 && y == 0) std::cout << "SS";      // Start
+            else if (x == size - 1 && y == size - 1) std::cout << "EE"; // End
+            else std::cout << "  ";                       // Open Room
+            
+            // Draw the Right door
+            bool rightConnected = false;
+            for (int n : nodes[currIdx].neighbors) {
+                if (n == getIndex(x + 1, y)) rightConnected = true;
+            }
+            
+            if (x < size - 1) {
+                if (rightConnected) std::cout << "  "; // Open passage
+                else std::cout << "██";                // Wall block
+            }
+        }
+        std::cout << "██\n"; // Right boundary
+        
+        // Print the Down doors (vertical connections) and corner pillars
+        if (y < size - 1) {
+            std::cout << "██"; // Left boundary
+            for (int x = 0; x < size; ++x) {
+                int currIdx = getIndex(x, y);
+                
+                // Draw the Down door
+                bool downConnected = false;
+                for (int n : nodes[currIdx].neighbors) {
+                    if (n == getIndex(x, y + 1)) downConnected = true;
+                }
+                
+                if (downConnected) std::cout << "  "; // Open passage
+                else std::cout << "██";               // Wall block
+                
+                // Draw the corner pillar between rooms
+                if (x < size - 1) std::cout << "██";  
+            }
+            std::cout << "██\n"; // Right boundary
+        }
+    }
+    
+    // Print the bottom outer boundary
+    for (int x = 0; x < size * 2 + 1; ++x) std::cout << "██";
+    std::cout << "\n";
 }

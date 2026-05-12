@@ -13,7 +13,12 @@ private:
 public:
     Graph(int size);
     
+    void generatePerfectMaze(unsigned int seed);
+    void generateGameMap(unsigned int seed, double obstacleDensity);
     void generateGuaranteedGameMap(unsigned int seed, double openFactor);
+    
+    // NEW: Prints a visual representation of the maze to the console
+    void printMaze() const;
     
     const std::vector<Node>& getNodes() const;
     int getSize() const;
