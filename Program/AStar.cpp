@@ -1,63 +1,49 @@
 #include "AStar.h"
 #include <queue>
+#include <vector>
 #include <cmath>
-#include <unordered_set>
 
-struct Compare {
-    bool operator()(Node* a, Node* b) {
-        return (a->g + a->h) > (b->g + b->h);
-    }
-};
-
-static int heuristic(int x1, int y1, int x2, int y2) {
-    return abs(x1 - x2) + abs(y1 - y2);
+int AStar::heuristic(int x1, int y1, int x2, int y2) {
+    return std::abs(x1 - x2) + std::abs(y1 - y2);
 }
 
-bool AStar::solve(const Maze& maze) {
-    int goalX = maze.width - 2;
-    int goalY = maze.height - 2;
+bool AStar::solve(const Graph& graph) {
+    int size = graph.getSize();
+    const std::vector<Node>& nodes = graph.getNodes();
+    
+    int startIdx = graph.getIndex(0, 0);
+    int goalIdx = graph.getIndex(size - 1, size - 1);
 
-    std::priority_queue<Node*, std::vector<Node*>, Compare> open;
-    std::vector<std::vector<bool>> visited(maze.height, std::vector<bool>(maze.width, false));
+    std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, std::greater<std::pair<int, int>>> openSet;
 
-    Node* start = new Node{1, 1, 0, heuristic(1,1,goalX,goalY), nullptr};
-    open.push(start);
+    std::vector<int> gScore(graph.getTotalNodes(), 1e9); 
+    gScore[startIdx] = 0;
 
-    while (!open.empty()) {
-        Node* current = open.top();
-        open.pop();
+    openSet.push({heuristic(0, 0, size - 1, size - 1), startIdx});
 
-        if (current->x == goalX && current->y == goalY) {
-            delete current;
+    while (!openSet.empty()) {
+        int currentIdx = openSet.top().second;
+        openSet.pop();
+
+        if (currentIdx == goalIdx) {
             return true;
         }
 
-        if (visited[current->y][current->x]) {
-            delete current;
-            continue;
-        }
+        const Node& currentNode = nodes[currentIdx];
 
-        visited[current->y][current->x] = true;
+        // Check all connected neighbors in the graph
+        for (int neighborIdx : currentNode.neighbors) {
+            int tentative_gScore = gScore[currentIdx] + 1; 
 
-        int dirs[4][2] = {{1,0},{-1,0},{0,1},{0,-1}};
-
-        for (auto &d : dirs) {
-            int nx = current->x + d[0];
-            int ny = current->y + d[1];
-
-            if (maze.isWalkable(nx, ny) && !visited[ny][nx]) {
-                Node* neighbor = new Node{
-                    nx, ny,
-                    current->g + 1,
-                    heuristic(nx, ny, goalX, goalY),
-                    nullptr
-                };
-                open.push(neighbor);
+            if (tentative_gScore < gScore[neighborIdx]) {
+                gScore[neighborIdx] = tentative_gScore;
+                
+                const Node& neighborNode = nodes[neighborIdx];
+                int fScore = tentative_gScore + heuristic(neighborNode.x, neighborNode.y, size - 1, size - 1);
+                
+                openSet.push({fScore, neighborIdx});
             }
         }
-
-        delete current;
     }
-
     return false;
 }

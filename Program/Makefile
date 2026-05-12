@@ -1,19 +1,18 @@
-CXX = g++
-CXXFLAGS = -std=c++17 -O2
+CXX = mpicxx
+CXXFLAGS = -std=c++11 -Wall -O3
+TARGET = maze
 
-OBJS = main.o Maze.o AStar.o
+OBJS = main.o Graph.o AStar.o BidirectionalAStar.o ParallelAStar.o WaypointAStar.o
 
-maze: $(OBJS)
-	$(CXX) $(CXXFLAGS) -o maze $(OBJS)
+all: $(TARGET)
 
-main.o: main.cpp Maze.h AStar.h
-	$(CXX) $(CXXFLAGS) -c main.cpp
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
 
-Maze.o: Maze.cpp Maze.h
-	$(CXX) $(CXXFLAGS) -c Maze.cpp
-
-AStar.o: AStar.cpp AStar.h Maze.h
-	$(CXX) $(CXXFLAGS) -c AStar.cpp
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o maze
+	rm -f $(OBJS) $(TARGET)
+
+.PHONY: all clean

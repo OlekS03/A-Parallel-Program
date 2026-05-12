@@ -1,18 +1,14 @@
 #ifndef ASTAR_H
 #define ASTAR_H
 
-#include "Maze.h"
-#include <vector>
-
-struct Node {
-    int x, y;
-    int g, h;
-    Node* parent;
-};
+#include "Graph.h"
 
 class AStar {
+private:
+    static int heuristic(int x1, int y1, int x2, int y2);
+
 public:
-    static bool solve(const Maze& maze);
+    static bool solve(const Graph& graph);
 };
 
-#endif
+#endif // ASTAR_H
